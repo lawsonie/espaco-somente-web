@@ -1,5 +1,7 @@
 "use client"
 
+import React from "react"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -11,16 +13,30 @@ import {
   Settings,
   Menu,
   X,
+  Wallet,
+  LayoutDashboard,
+  Link2,
 } from "lucide-react"
 import { useState } from "react"
 
-const navigation = [
+interface NavItem {
+  id: string
+  name: string
+  href: string
+  icon: React.ElementType
+  subtitle?: string
+}
+
+const navigation: NavItem[] = [
+  { id: "dashboard", name: "Início", href: "/", icon: LayoutDashboard, subtitle: "Visão geral" },
   { id: "pacientes", name: "Gestão de Pacientes", href: "/pacientes", icon: Users, subtitle: "O Cofre offline" },
+  { id: "financeiro", name: "Gestão Financeira", href: "/financeiro", icon: Wallet, subtitle: "Cobranças e recebimentos" },
+  { id: "links", name: "Central de Links", href: "/links", icon: Link2, subtitle: "Formulários e modelos" },
   { id: "testes", name: "Plataforma de Testes", href: "/testes", icon: ClipboardList },
   { id: "ia", name: "IA Assistente", href: "/ia-assistente", icon: Brain, subtitle: "Revisão e ABNT" },
   { id: "utilitarios", name: "Utilitários Contábeis", href: "/utilitarios", icon: FolderOpen, subtitle: "Gavetas" },
   { id: "config", name: "Configurações", href: "/configuracoes", icon: Settings },
-] as const
+]
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -54,23 +70,23 @@ export function Sidebar() {
         )}
       >
         {/* Logo area */}
-        <div className="flex flex-col items-center px-6 pt-8 pb-6">
-          <div className="bg-white p-2 rounded-lg shadow-sm mb-2 inline-block">
+        <Link href="/" className="flex flex-col items-center px-6 pt-8 pb-6 group">
+          <div className="bg-white p-2 rounded-lg shadow-sm mb-2 inline-block transition-transform duration-200 group-hover:scale-105">
             <img
               src="/logo_ESM.png"
               alt="Logótipo Espaço Só Mente"
               className="h-20 w-auto"
             />
           </div>
-          <span className="text-xs font-medium uppercase tracking-wider text-sidebar-foreground/70">
+          <span className="text-xs font-medium uppercase tracking-wider text-sidebar-foreground/70 group-hover:text-sidebar-foreground transition-colors">
             Espaço Só Mente
           </span>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 px-3">
           {navigation.map((item) => {
-            const isActive = pathname === item.href
+            const isActive = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(item.href + "/")
             return (
               <Link
                 key={item.id}
