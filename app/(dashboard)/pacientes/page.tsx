@@ -1,7 +1,16 @@
+"use client"
+
+import { useState } from "react"
 import FormularioPaciente from "@/components/pacientes/FormularioPaciente"
 import ListaPacientes from "@/components/pacientes/ListaPacientes"
 
 export default function PaginaGestaoPacientes() {
+    const [refreshKey, setRefreshKey] = useState(0)
+
+    function handlePacienteSalvo() {
+        setRefreshKey((k) => k + 1)
+    }
+
     return (
         <main className="p-6 lg:p-8">
             <div className="mb-8">
@@ -16,12 +25,12 @@ export default function PaginaGestaoPacientes() {
             <div className="flex flex-col gap-10 max-w-5xl">
                 {/* Área de Cadastro */}
                 <section>
-                    <FormularioPaciente />
+                    <FormularioPaciente onPacienteSalvo={handlePacienteSalvo} />
                 </section>
 
                 {/* Tabela de Gestão com Busca, Edição e Exclusão */}
                 <section>
-                    <ListaPacientes />
+                    <ListaPacientes refreshKey={refreshKey} />
                 </section>
             </div>
         </main>

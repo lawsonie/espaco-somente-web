@@ -547,7 +547,7 @@ function FichaPaciente({
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
-export default function ListaPacientes() {
+export default function ListaPacientes({ refreshKey }: { refreshKey?: number }) {
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState("")
@@ -568,7 +568,7 @@ export default function ListaPacientes() {
 
   useEffect(() => {
     buscarPacientes()
-  }, [])
+  }, [refreshKey])
 
   async function buscarPacientes() {
     setLoading(true)

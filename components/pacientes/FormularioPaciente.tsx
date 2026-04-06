@@ -3,7 +3,11 @@
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
 
-export default function FormularioPaciente() {
+type Props = {
+    onPacienteSalvo?: () => void
+}
+
+export default function FormularioPaciente({ onPacienteSalvo }: Props) {
     // 1. Estados (memória temporária) para guardar o que o usuário digita
     const [nome, setNome] = useState("")
     const [cpf, setCpf] = useState("")
@@ -13,6 +17,7 @@ export default function FormularioPaciente() {
     const [endereco, setEndereco] = useState("")
     const [modalidade, setModalidade] = useState("Sessão Avulsa")
     const [diaVencimento, setDiaVencimento] = useState("10")
+
 
     // Estado para controlar o carregamento e mensagens
     const [loading, setLoading] = useState(false)
@@ -44,16 +49,20 @@ export default function FormularioPaciente() {
 
         if (error) {
             console.error("Erro ao salvar:", error)
-            setMensagem("❌ Erro ao salvar o paciente. Tente novamente.")
+            setMensagem("Erro ao salvar o paciente. Tente novamente.")
         } else {
-            setMensagem("✅ Paciente salvo com sucesso no Cofre!")
-            // Limpa os campos após salvar
+            setMensagem("Paciente salvo com sucesso no Cofre!")
+            // Limpa todos os campos após salvar
             setNome("")
             setCpf("")
             setTelefone("")
             setEmail("")
             setCep("")
             setEndereco("")
+            setModalidade("Sessão Avulsa")
+            setDiaVencimento("10")
+            // Notifica o componente pai para re-buscar a lista
+            onPacienteSalvo?.()
         }
 
         setLoading(false)
