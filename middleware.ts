@@ -32,18 +32,18 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // Verifica a sessão real no servidor
-    const { data: { session } } = await supabase.auth.getSession()
+    // Verifica o usuário autenticado no servidor (mais seguro que getSession)
+    const { data: { user } } = await supabase.auth.getUser()
 
     const isPublicRoute = request.nextUrl.pathname === '/login'
 
-    // Regra 1: Sem sessão e fora do login -> chuta pro login
-    if (!session && !isPublicRoute) {
+    // Regra 1: Sem usuário autenticado e fora do login -> redireciona pro login
+    if (!user && !isPublicRoute) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Regra 2: Com sessão e no login -> manda pro Dashboard
-    if (session && isPublicRoute) {
+    // Regra 2: Com usuário autenticado e no login -> manda pro Dashboard
+    if (user && isPublicRoute) {
         return NextResponse.redirect(new URL('/', request.url))
     }
 

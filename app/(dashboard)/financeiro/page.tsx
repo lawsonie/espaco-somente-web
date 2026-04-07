@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { supabase } from "@/lib/supabase"
+import { createClient } from '@/lib/supabase/client'
 import { Wallet, TrendingDown, Clock, Plus, CheckCircle2, Loader2, Trash2, RotateCcw } from "lucide-react"
 import {
   AlertDialog,
@@ -100,6 +100,7 @@ const formInicial = {
 // ─── Página (Client Component) ────────────────────────────────────────────────
 
 export default function PaginaFinanceiro() {
+  const supabase = createClient()
   const [lista, setLista] = useState<RegistroFinanceiro[]>([])
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [carregando, setCarregando] = useState(true)

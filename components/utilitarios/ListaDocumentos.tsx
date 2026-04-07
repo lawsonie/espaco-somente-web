@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import {
     Card,
     CardContent,
@@ -79,6 +79,7 @@ function formatarBytes(bytes: number): string {
 // ─── Hook: busca arquivos de uma aba ─────────────────────────────────────────
 
 function useArquivos(aba: Aba) {
+    const supabase = createClient()
     const [arquivos, setArquivos] = useState<ArquivoStorage[]>([])
     const [carregando, setCarregando] = useState(false)
     const [erro, setErro] = useState<string | null>(null)
@@ -105,7 +106,7 @@ function useArquivos(aba: Aba) {
 
         // Filtra itens que são arquivos reais (tamanho > 0)
         const arquivosReais: ArquivoStorage[] = (data ?? [])
-            .filter((item) => item.metadata?.size > 0)
+            .filter((item) => ((item.metadata?.size as number) ?? 0) > 0)
             .map((item) => ({
                 name: item.name,
                 path: `${pasta}/${item.name}`,
@@ -132,6 +133,7 @@ interface LinhaArquivoProps {
 }
 
 function LinhaArquivo({ arquivo, recarregar }: LinhaArquivoProps) {
+    const supabase = createClient()
     const [baixando, setBaixando] = useState(false)
     const [excluindo, setExcluindo] = useState(false)
 

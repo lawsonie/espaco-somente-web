@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/client"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -96,6 +96,7 @@ type ModalEditarProps = {
 }
 
 function ModalEditarPaciente({ paciente, open, onOpenChange, onSalvo }: ModalEditarProps) {
+  const supabase = createClient()
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
   const [telefone, setTelefone] = useState("")
@@ -315,6 +316,7 @@ function FichaPaciente({
   onOpenChange: (v: boolean) => void
   onEditarDados: () => void
 }) {
+  const supabase = createClient()
   // Controla qual campo acabou de ser copiado ("cpf" | "cep" | null)
   const [copiado, setCopiado] = useState<"cpf" | "cep" | null>(null)
 
@@ -548,6 +550,7 @@ function FichaPaciente({
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
 export default function ListaPacientes({ refreshKey }: { refreshKey?: number }) {
+  const supabase = createClient()
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState("")

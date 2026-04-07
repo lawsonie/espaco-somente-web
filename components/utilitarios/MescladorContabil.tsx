@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { PDFDocument } from 'pdf-lib'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import {
     Card,
     CardContent,
@@ -173,6 +173,7 @@ async function mesclarArquivos(arquivos: File[]): Promise<Uint8Array> {
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
 export default function MescladorContabil() {
+    const supabase = createClient()
     const [categoria, setCategoria] = useState<Categoria | ''>('')
     const [arquivos, setArquivos] = useState<ArquivoSelecionado[]>([])
     const [status, setStatus] = useState<StatusUpload>('idle')
@@ -256,7 +257,7 @@ export default function MescladorContabil() {
             setStatus('enviando')
             setMensagem('Enviando para o cofre seguro do Supabase…')
             const nomeArquivo = gerarNomeArquivo(categoria as Categoria)
-            const blob = new Blob([bytes], { type: 'application/pdf' })
+            const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/pdf' })
 
             const { data, error } = await supabase.storage
                 .from('documentos_contabeis')

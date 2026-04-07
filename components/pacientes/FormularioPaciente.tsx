@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/client"
 import { formatCPF, formatPhone, formatCEP } from "@/lib/utils"
 
 type Props = {
@@ -9,6 +9,7 @@ type Props = {
 }
 
 export default function FormularioPaciente({ onPacienteSalvo }: Props) {
+    const supabase = createClient()
     const [nome, setNome] = useState("")
     const [cpf, setCpf] = useState("")
     const [telefone, setTelefone] = useState("")
@@ -35,12 +36,14 @@ export default function FormularioPaciente({ onPacienteSalvo }: Props) {
         setLoading(true)
         setMensagem("")
 
+        const cpfLimpo = cpf.replace(/\D/g, '')
+
         const { error } = await supabase
             .from("pacientes")
             .insert([
                 {
                     nome_completo: nome,
-                    cpf: cpf,
+                    cpf: cpfLimpo,
                     telefone: telefone,
                     email: email,
                     cep: cep,
