@@ -1,0 +1,128 @@
+# Plano de Implementação: Mesa de Trabalho (Spec.md)
+# Implementation Plan: Mesa de Trabalho (Spec.md)
+
+## Root Cause / Causa Raiz
+
+The current codebase has **routing debt and architectural drift** from the Spec:
+
+- **`/links` and `/contratos` routes** are orphaned pages that duplicate functionality now consolidated into `/utilitarios`. Their existence in the Sidebar (`"Central de Links"`) creates a false navigation entry that leads to a dead or redundant UX path.
+- **`/utilitarios/page.tsx`** currently renders `MescladorContabil` and `ListaDocumentos` — components unrelated to the Spec's definition of "Mesa de Trabalho". The page identity, content, and purpose are entirely misaligned with the Spec.
+
+---
+
+## Proposed Changes / Mudanças Propostas
+
+---
+
+### Task 2 — Faxina de Rotas (Route Cleanup)
+
+#### [DELETE] `app/(dashboard)/links/page.tsx`
+- **EN:** The entire `/links` folder will be deleted. This route is superseded by the new unified "Mesa de Trabalho" at `/utilitarios`.
+- **PT:** A pasta `/links` será deletada integralmente, pois sua função (formulários e links rápidos) foi absorvida pela nova Mesa de Trabalho.
+
+#### [DELETE] `app/(dashboard)/contratos/page.tsx`
+- **EN:** The entire `/contratos` folder will be deleted. Templates are now managed as static download buttons inside the "Cofre de Templates" block.
+- **PT:** A pasta `/contratos` será deletada. Os templates agora vivem como botões de download dentro do Bloco 1 da Mesa de Trabalho.
+
+#### [MODIFY] `components/dashboard/sidebar.tsx`
+- **EN:** Remove the `Link2` icon import and the `links` nav item from the `navigation` array. Update the `utilitarios` nav item's name and subtitle to reflect it is now the "Mesa de Trabalho".
+- **PT:** Remover o import do ícone `Link2` e o item `"Central de Links"` do array de navegação. Atualizar o item `utilitarios` para refletir o novo nome "Mesa de Trabalho".
+
+**Delta (navigation array):**
+```diff
+- import { ..., Link2 } from "lucide-react"
++ import { ..., Briefcase } from "lucide-react"
+
+  const navigation: NavItem[] = [
+    { id: "dashboard", name: "Início", href: "/", icon: LayoutDashboard, subtitle: "Visão geral" },
+    { id: "pacientes", name: "Gestão de Pacientes", href: "/pacientes", icon: Users, subtitle: "O Cofre offline" },
+    { id: "financeiro", name: "Gestão Financeira", href: "/financeiro", icon: Wallet, subtitle: "Cobranças e recebimentos" },
+-   { id: "links", name: "Central de Links", href: "/links", icon: Link2, subtitle: "Formulários e modelos" },
+    { id: "testes", name: "Plataforma de Testes", href: "/testes", icon: ClipboardList },
+    { id: "ia", name: "IA Assistente", href: "/ia-assistente", icon: Brain, subtitle: "Revisão e ABNT" },
+-   { id: "utilitarios", name: "Utilitários Contábeis", href: "/utilitarios", icon: FolderOpen, subtitle: "Gavetas" },
++   { id: "utilitarios", name: "Mesa de Trabalho", href: "/utilitarios", icon: Briefcase, subtitle: "Templates, Formulários e Testes" },
+    { id: "config", name: "Configurações", href: "/configuracoes", icon: Settings },
+  ]
+```
+
+---
+
+### Task 3 — Construção da UI (Mesa de Trabalho)
+
+#### [MODIFY] `app/(dashboard)/utilitarios/page.tsx`
+- **EN:** Full rewrite of the page. The component becomes `'use client'` to support clipboard interactions. The layout uses a **two-column grid** (main content + sidebar placeholder), with three Card sections.
+- **PT:** Reescrita completa da página. O componente vira `'use client'` para suportar a função de copiar link. O layout usa um **grid de duas colunas** (conteúdo principal + placeholder lateral).
+
+**Layout Structure / Estrutura do Layout:**
+
+```
+┌─────────────────────────────────────────┬──────────────────┐
+│  MAIN CONTENT (3/4 width)               │  SIDEBAR (1/4)   │
+│                                         │                  │
+│  [Card 1] Bloco 1: Cofre de Templates   │  [Placeholder]   │
+│  ─ Contrato Psicoterapia (Download)     │  Agente          │
+│  ─ Contrato Avaliação (Download)        │  Concierge       │
+│                                         │  (Em breve)      │
+│  [Card 2] Bloco 2: Central de           │                  │
+│           Atendimento (Formulários)     │                  │
+│  ─ Anamnese Adulto (Copiar Link)        │                  │
+│  ─ Anamnese Criança (Copiar Link)       │                  │
+│                                         │                  │
+│  [Card 3] Bloco 3: Plataformas          │                  │
+│  ─ Vetor Online (Abrir ↗)              │                  │
+│  ─ Hogrefe (Abrir ↗)                   │                  │
+└─────────────────────────────────────────┴──────────────────┘
+```
+
+**Icons (lucide-react):**
+| Item | Icon |
+|---|---|
+| Cofre de Templates (header) | `FileText` |
+| Botões de Download | `Download` |
+| Central de Formulários (header) | `ClipboardList` |
+| Botão Copiar Link | `Copy` / `Check` (feedback) |
+| Plataformas (header) | `Monitor` |
+| Botões Externos | `ExternalLink` |
+| Placeholder Concierge | `Bot` |
+
+**Key Logic (Clipboard):**
+```tsx
+const [copiedId, setCopiedId] = useState<string | null>(null)
+
+const handleCopy = (id: string, url: string) => {
+  navigator.clipboard.writeText(url)
+  setCopiedId(id)
+  setTimeout(() => setCopiedId(null), 2000)
+}
+```
+> Feedback visual: o ícone muda de `Copy` → `Check` (verde) por 2 segundos após a cópia.
+
+**Exact URLs from Spec:**
+- Anamnese Adulto: `https://forms.gle/TZgVocekgtnSgmax9`
+- Anamnese Criança/Adolescente: `https://forms.gle/TpP37XHUwmWenrSe7`
+- Vetor Online: link de redirecionamento (placeholder `#` até URL ser fornecida)
+- Hogrefe: link de redirecionamento (placeholder `#` até URL ser fornecida)
+
+> [!IMPORTANT]
+> **As URLs do Vetor Online e Hogrefe não estão no Spec.md.** O plano usa `href="#"` como placeholder seguro. Você pode fornecer as URLs reais antes ou após a implementação.
+
+---
+
+## Open Questions / Perguntas Abertas
+
+> [!IMPORTANT]
+> **Os arquivos `.docx` de template existem?** O Spec.md menciona `public/templates`. Se os arquivos não estiverem presentes, os botões de Download terão `href="#"` como placeholder seguro, idêntico ao comportamento dos links externos.
+
+> [!IMPORTANT]
+> **URLs do Vetor Online e Hogrefe:** Você tem as URLs para esses sistemas? Se sim, informe antes da execução para que eu possa incluí-las diretamente.
+
+---
+
+## Verification Plan / Plano de Verificação
+
+1. Confirmar que as pastas `/links` e `/contratos` foram removidas do filesystem.
+2. Confirmar que a Sidebar não exibe mais o item "Central de Links".
+3. Confirmar que o item "Mesa de Trabalho" aparece no menu e navega para `/utilitarios`.
+4. Testar o botão **Copiar Link** (Anamnese Adulto): verificar feedback visual e URL copiada no clipboard.
+5. Confirmar que os 3 Cards e o Placeholder lateral são renderizados corretamente.

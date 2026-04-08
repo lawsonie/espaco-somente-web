@@ -9,13 +9,12 @@ import {
   Users,
   ClipboardList,
   Brain,
-  FolderOpen,
+  Briefcase,
   Settings,
   Menu,
   X,
   Wallet,
   LayoutDashboard,
-  Link2,
 } from "lucide-react"
 import { useState } from "react"
 
@@ -31,10 +30,9 @@ const navigation: NavItem[] = [
   { id: "dashboard", name: "Início", href: "/", icon: LayoutDashboard, subtitle: "Visão geral" },
   { id: "pacientes", name: "Gestão de Pacientes", href: "/pacientes", icon: Users, subtitle: "O Cofre offline" },
   { id: "financeiro", name: "Gestão Financeira", href: "/financeiro", icon: Wallet, subtitle: "Cobranças e recebimentos" },
-  { id: "links", name: "Central de Links", href: "/links", icon: Link2, subtitle: "Formulários e modelos" },
   { id: "testes", name: "Plataforma de Testes", href: "/testes", icon: ClipboardList },
   { id: "ia", name: "IA Assistente", href: "/ia-assistente", icon: Brain, subtitle: "Revisão e ABNT" },
-  { id: "utilitarios", name: "Utilitários Contábeis", href: "/utilitarios", icon: FolderOpen, subtitle: "Gavetas" },
+  { id: "utilitarios", name: "Mesa de Trabalho", href: "/utilitarios", icon: Briefcase, subtitle: "Templates, Formulários e Testes" },
   { id: "config", name: "Configurações", href: "/configuracoes", icon: Settings },
 ]
 
