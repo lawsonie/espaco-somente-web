@@ -1,0 +1,113 @@
+# Task 4 — Agente Concierge na Mesa de Trabalho
+
+## Root Cause / Contexto
+
+**EN:** The `utilitarios` page currently has a static placeholder `<aside>` (dashed border, "Em breve" badge) occupying the right column reserved for the Concierge Agent. No API route or AI component exists. The Vercel AI SDK packages (`ai`, `@ai-sdk/google`) are not yet installed.
+
+**PT-BR:** A página `utilitarios` hoje possui um `<aside>` estático com borda tracejada e badge "Em breve" ocupando a coluna direita reservada ao Agente. Não existe rota de API nem componente de IA. Os pacotes do Vercel AI SDK (`ai`, `@ai-sdk/google`) ainda não estão instalados.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> A variável de ambiente `GOOGLE_GENERATIVE_AI_API_KEY` deve estar presente no arquivo `.env.local` antes de executar. Confirme se a chave já existe ou se precisa ser adicionada.
+
+> [!WARNING]
+> O modelo especificado no Spec.md é `gemini-flash-latest`. O identificador correto para o `@ai-sdk/google` é `google('gemini-2.0-flash-exp')` ou `google('gemini-1.5-flash-latest')`. Usarei exatamente o string `gemini-flash-latest` conforme o Spec, mas se a API retornar erro de modelo não encontrado, será necessário ajustar para `gemini-1.5-flash-latest`.
+
+---
+
+## Proposed Changes / Mudanças Propostas
+
+### 0 — Instalação de Dependências
+
+#### [INSTALL] `ai` + `@ai-sdk/google`
+
+```bash
+npm install ai @ai-sdk/google
+```
+
+**EN:** Installs the Vercel AI SDK core and the Google provider adapter.  
+**PT-BR:** Instala o núcleo do Vercel AI SDK e o adaptador do provedor Google.
+
+---
+
+### 1 — API Route (Backend)
+
+#### [NEW] `app/api/chat/route.ts`
+
+**EN:** A `POST` Route Handler using the `streamText` function from `ai`. It:
+- Reads the `messages` array from the request body.
+- Instantiates the Google provider with `google('gemini-flash-latest')`.
+- Applies the **System Prompt from Spec.md Section 4** as the `system` parameter (verbatim, no modifications).
+- Enforces **`maxTokens: 300`** as the FinOps guard.
+- Returns a streaming `Response` via `result.toDataStreamResponse()`.
+
+**PT-BR:** Um Route Handler `POST` usando `streamText` do `ai`. Ele:
+- Lê o array `messages` do corpo da requisição.
+- Instancia o provedor Google com `google('gemini-flash-latest')`.
+- Aplica o **System Prompt do Spec.md Seção 4** como parâmetro `system` (literal, sem modificações).
+- Aplica **`maxTokens: 300`** como restrição de FinOps.
+- Retorna uma `Response` em streaming via `result.toDataStreamResponse()`.
+
+```
+app/
+└── api/
+    └── chat/
+        └── route.ts   ← [NEW]
+```
+
+---
+
+### 2 — Componente Cliente
+
+#### [NEW] `components/dashboard/chat-concierge.tsx`
+
+**EN:** A `"use client"` component using the `useChat` hook from `ai/react`. UI design:
+- **Header:** `Bot` icon + title "Agente Concierge" + subtitle "Assistente da Mesa de Trabalho".
+- **Message area:** Scrollable list of chat messages (role `user` → right-aligned bubble; role `assistant` → left-aligned bubble). Shows a pulsing dot indicator while the AI is loading.
+- **Input area:** Text input + "Enviar" button (disabled while loading). Submits on `Enter` key.
+- **Aesthetic:** Matches the existing card style of the page (same `bg-card`, `border-border`, `rounded-xl`). No additional dependencies — pure Tailwind/CSS variables.
+- **Initial state:** A welcome message pre-rendered in the UI (not injected into the AI context) to orient the user: *"Olá! Sou o Assistente Concierge. Posso ajudar você a localizar documentos, links e usar as plataformas parceiras."*
+
+**PT-BR:** Componente `"use client"` usando o hook `useChat` do `ai/react`. Design da UI:
+- **Header:** ícone `Bot` + título "Agente Concierge" + subtítulo "Assistente da Mesa de Trabalho".
+- **Área de mensagens:** Lista rolável de mensagens (role `user` → bolha à direita; role `assistant` → bolha à esquerda). Indicador de ponto pulsante durante carregamento.
+- **Área de input:** Campo de texto + botão "Enviar" (desabilitado durante loading). Envia com `Enter`.
+- **Estética:** Segue o estilo dos cards existentes na página (mesmo `bg-card`, `border-border`, `rounded-xl`). Sem dependências extras.
+- **Estado inicial:** Mensagem de boas-vindas pré-renderizada na UI (fora do contexto de IA): *"Olá! Sou o Assistente Concierge. Posso ajudar você a localizar documentos, links e usar as plataformas parceiras."*
+
+---
+
+### 3 — Integração na Página
+
+#### [MODIFY] `app/(dashboard)/utilitarios/page.tsx`
+
+**EN:** Replace the static placeholder `<aside>` (lines 226–244) with `<ChatConcierge />`. No other changes to the file — the grid layout, 3 main blocks and all data remain untouched.
+
+**PT-BR:** Substituir o `<aside>` estático de placeholder (linhas 226–244) pelo `<ChatConcierge />`. Nenhuma outra mudança no arquivo — o grid, os 3 blocos principais e todos os dados permanecem intactos.
+
+```diff
+- {/* ── Agente Concierge Placeholder (1/4) ─── */}
+- <aside className="lg:col-span-1 ...dashed border...">
+-   ...static placeholder content...
+- </aside>
+
++ <ChatConcierge />
+```
+
+---
+
+## Verification Plan
+
+### Automated
+- `npm run dev` followed by browser navigation to `/utilitarios`.
+- Verify the right column renders the chat UI (not the placeholder).
+- Send a valid in-scope message → confirm streaming response arrives within guardrails.
+- Send an out-of-scope message (e.g., "explique depressão") → confirm the refusal message is returned.
+
+### Manual Verification
+- Confirm `GOOGLE_GENERATIVE_AI_API_KEY` is set in `.env.local`.
+- Inspect Network tab to confirm `POST /api/chat` returns `200` with `text/event-stream` content type.
+- Verify `maxTokens: 300` is respected (responses should be short).

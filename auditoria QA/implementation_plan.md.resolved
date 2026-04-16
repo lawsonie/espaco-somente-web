@@ -1,0 +1,116 @@
+# Global Command Palette — Refatoração do Agente Concierge
+
+## Contexto / Background
+
+O componente `ChatConcierge` atual vive dentro de `utilitarios/page.tsx` como uma coluna lateral num grid de 4 colunas. Isso cria dois problemas: (1) o ciclo de re-render do React na sidebar e (2) o assistente é inacessível em outras páginas da clínica. A solução é transformá-lo num **Dialog flutuante global**, registrado no `layout.tsx` do dashboard, disponível em toda a aplicação via um **Floating Action Button (FAB)**.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> O `layout.tsx` do dashboard é um **Server Component** (sem `"use client"`). O novo `<GlobalConcierge />` é um Client Component. Isso é totalmente válido no Next.js App Router — Server Components podem importar Client Components diretamente. Nenhuma mudança no layout server-side é necessária além do `import` e da `<tag />`.
+
+> [!WARNING]
+> O arquivo original `components/dashboard/chat-concierge.tsx` **não será deletado** — ele ainda existe como referência. Apenas sua importação e uso em `utilitarios/page.tsx` serão removidos. Se desejar deletar o arquivo antigo, informe após a execução.
+
+---
+
+## Proposed Changes / Mudanças Propostas
+
+### 1 — `utilitarios/page.tsx` — Remover coluna lateral
+
+#### [MODIFY] [page.tsx](file:///c:/projetos/Next.js/espaco-somente-web/app/(dashboard)/utilitarios/page.tsx)
+
+- Remover `import { ChatConcierge }` da linha 13
+- Remover a tag `<ChatConcierge />` da linha 227
+- Alterar o `<div>` container do grid para **`lg:col-span-4`** completo (remover o grid de 4 colunas, deixar conteúdo em largura total)
+
+```diff
+- import { ChatConcierge } from "@/components/dashboard/chat-concierge"
+  ...
+- <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+-   <div className="lg:col-span-3 flex flex-col gap-6">
++ <div className="flex flex-col gap-6">
+      {/* blocos de conteúdo */}
+-   </div>
+-   <ChatConcierge />
+- </div>
++ </div>
+```
+
+---
+
+### 2 — `components/concierge/global-concierge.tsx` — Novo componente [NEW]
+
+#### [NEW] [global-concierge.tsx](file:///c:/projetos/Next.js/espaco-somente-web/components/concierge/global-concierge.tsx)
+
+Novo Client Component com:
+
+| Elemento | Detalhe técnico |
+|---|---|
+| **FAB (Floating Action Button)** | `position: fixed`, canto inferior direito (`bottom-6 right-6`), `z-index: 50`, ícone `<Bot />` |
+| **Estado** | `useState<boolean>(false)` — `isOpen` |
+| **Overlay** | `div` fixo cobrindo a tela com `backdrop-blur-sm bg-black/40`, clicável para fechar |
+| **Dialog** | `div` centralizado com `z-index: 60`, `max-w-lg`, `max-h-[80vh]`, `rounded-2xl`, `shadow-2xl` |
+| **Lógica de chat** | Toda a lógica `useChat` + `messages` migrada do `chat-concierge.tsx` para dentro deste componente |
+| **Animação** | Transição `opacity` + `scale` via `transition-all duration-200` no overlay e dialog |
+| **Atalho ESC** | `useEffect` com `keydown` listener para fechar com `Escape` |
+| **Botão fechar** | `<X />` icon no header do dialog |
+
+**Estrutura visual do Dialog:**
+```
+┌──────────────────────────────┐
+│  🤖 Agente Concierge   [×]  │  ← Header com status Online
+├──────────────────────────────┤
+│  Área de mensagens           │  ← overflow-y-auto, scroll suave
+│  (bubbles user/assistant)    │
+├──────────────────────────────┤
+│  [ input... ]  [➤ Enviar]   │  ← Form de input
+└──────────────────────────────┘
+```
+
+---
+
+### 3 — `app/(dashboard)/layout.tsx` — Registrar globalmente
+
+#### [MODIFY] [layout.tsx](file:///c:/projetos/Next.js/espaco-somente-web/app/(dashboard)/layout.tsx)
+
+```diff
+  import { Sidebar } from "@/components/dashboard/sidebar"
+  import { Topbar } from "@/components/dashboard/topbar"
++ import { GlobalConcierge } from "@/components/concierge/global-concierge"
+
+  export default function DashboardLayout({ children }) {
+    return (
+      <div className="flex h-screen bg-background overflow-hidden">
+        <Sidebar />
+        <div className="flex flex-1 flex-col lg:pl-64 overflow-hidden">
+          <Topbar />
+          <main className="flex-1 overflow-y-auto">
+            {children}
+          </main>
+        </div>
++       <GlobalConcierge />
+      </div>
+    )
+  }
+```
+
+> [!NOTE]
+> O `<GlobalConcierge />` é inserido **fora** do `<main>`, diretamente no root `<div>` do layout, para que o FAB e o Dialog se posicionem relativamente ao viewport inteiro, não ao scroll da página.
+
+---
+
+## Verification Plan
+
+### Automated
+- Build local via `npm run dev` — verificar ausência de erros TypeScript/JSX
+- Confirmar que `utilitarios/page.tsx` não importa mais `ChatConcierge`
+
+### Manual / Visual
+- FAB aparece em **todas** as páginas do dashboard (pacientes, utilitários, etc.)
+- Clicar no FAB abre o Dialog centralizado com fundo desfocado
+- Clicar fora do dialog ou pressionar `ESC` fecha o dialog
+- O chat funciona (envia mensagem e recebe resposta do `/api/chat`)
+- A Mesa de Trabalho ocupa largura total após remover a coluna lateral

@@ -29,7 +29,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { createClient } from '@/lib/supabase/client'
-import { Wallet, TrendingDown, Clock, Plus, CheckCircle2, Loader2, Trash2, RotateCcw } from "lucide-react"
+import { Wallet, TrendingDown, Clock, Plus, CheckCircle2, Loader2, Trash2, RotateCcw, Archive } from "lucide-react"
+import MescladorContabil from "@/components/utilitarios/MescladorContabil"
+import ListaDocumentos from "@/components/utilitarios/ListaDocumentos"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -619,6 +621,30 @@ export default function PaginaFinanceiro() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ─── Seção: Utilitários Contábeis ──────────────────────────────────────── */}
+      <div className="mt-10">
+        <hr className="border-gray-100 mb-8" />
+
+        {/* Cabeçalho da seção */}
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#5FA199]/10">
+            <Archive className="h-5 w-5 text-[#5FA199]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Utilitários Contábeis</h2>
+            <p className="text-sm text-muted-foreground">
+              Mescle e gerencie documentos enviados ao contador.
+            </p>
+          </div>
+        </div>
+
+        {/* Grid dos dois componentes */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <MescladorContabil />
+          <ListaDocumentos />
+        </div>
+      </div>
     </div>
   )
 }

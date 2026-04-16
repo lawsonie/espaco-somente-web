@@ -9,8 +9,8 @@ import {
   Check,
   Monitor,
   ExternalLink,
-  Bot,
 } from "lucide-react"
+import { ChatConcierge } from "@/components/dashboard/chat-concierge"
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -223,25 +223,8 @@ export default function MesaDeTrabalho() {
           </section>
         </div>
 
-        {/* ── Agente Concierge Placeholder (1/4) ────────────────────────── */}
-        <aside className="lg:col-span-1 rounded-xl border border-dashed border-border bg-card/50 shadow-sm">
-          <div className="flex flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30 bg-muted">
-              <Bot className="h-7 w-7 text-muted-foreground/50" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-muted-foreground">
-                Agente Concierge
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground/60">
-                Assistente inteligente reservado para uso futuro nesta página.
-              </p>
-            </div>
-            <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
-              Em breve
-            </span>
-          </div>
-        </aside>
+        {/* ── Agente Concierge (1/4) ────────────────────────────────────── */}
+        <ChatConcierge />
 
       </div>
     </main>

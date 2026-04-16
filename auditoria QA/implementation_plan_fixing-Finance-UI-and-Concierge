@@ -1,0 +1,54 @@
+# Plano de Implementação — UI Fix + Feature Recovery
+
+## Contexto
+
+Dois problemas independentes para corrigir:
+
+1. **Feature Recovery**: `MescladorContabil` e `ListaDocumentos` ficaram órfãos quando `/utilitarios` virou a Mesa de Trabalho. Precisam ser reintegrados em `/financeiro`.
+2. **Bug `ChatConcierge`**: O botão de submit travava porque `disabled={isLoading || !input}` — `!input` só verifica se a string é falsy, mas há casos de borda (espaços em branco) e o `isLoading` não tinha handler de erro, podendo deixar o estado preso em `true` se a API falhasse silenciosamente.
+
+---
+
+## Root Cause / Análise
+
+### Ação 1 — Feature Recovery
+- `MescladorContabil` exporta `export default` → import precisa ser sem chaves.
+- `ListaDocumentos` exporta `export default` → idem.
+- Ambos são `'use client'` e se auto-sustentam (Supabase interno).
+- A página `/financeiro/page.tsx` já é `'use client'`, então não há conflito de server/client boundary.
+- Estratégia: adicionar uma **seção colapsável** "Utilitários Contábeis" no final da página, com os dois cards empilhados verticalmente (`grid gap-8`), separados visualmente do bloco financeiro por um `<hr>` e um cabeçalho de seção.
+
+### Ação 2 — Bug ChatConcierge
+- **Causa raiz**: `disabled={isLoading || !input}` — `input` vazio com espaços passa como truthy mas gera mensagem vazia para a IA. A correção é `input.trim().length === 0`.
+- **Causa raiz do travamento**: `useChat` sem `onError` — se a chamada `/api/chat` lança uma exceção de rede, `isLoading` pode não retornar a `false` dependendo da versão do SDK. O `onError` garante que erros sejam capturados.
+- **Melhoria adicional**: expor `error` do hook e exibir mensagem vermelha discreta abaixo do input quando existir.
+
+---
+
+## Mudanças Propostas
+
+### Ação 1 — Financeiro Page
+
+#### [MODIFY] [page.tsx](file:///c:/projetos/Next.js/espaco-somente-web/app/(dashboard)/financeiro/page.tsx)
+
+- Adicionar imports de `MescladorContabil` e `ListaDocumentos`.
+- Adicionar ícone `Archive` do lucide-react ao import existente.
+- Ao final do JSX (antes do `</div>` de fechamento) inserir seção "Utilitários Contábeis" com:
+  - Separador `<hr>` + cabeçalho com ícone
+  - Grid 2 colunas em tela grande (`lg:grid-cols-2`) para os dois cards
+
+### Ação 2 — ChatConcierge
+
+#### [MODIFY] [chat-concierge.tsx](file:///c:/projetos/Next.js/espaco-somente-web/components/dashboard/chat-concierge.tsx)
+
+- **Linha 11-12**: Extrair `error` do hook e adicionar `onError`.
+- **Linha 87**: Corrigir `disabled` do botão para `input.trim().length === 0`.
+- **Entre o `</form>` e o `</aside>`**: Exibir `<p>` de erro vermelho quando `error` existir.
+
+---
+
+## Verificação
+
+- Confirmar que a página `/financeiro` compila sem erros de tipo TS.
+- Confirmar que o chat aceita envio após digitar (botão habilitado), e que após erro de rede o botão volta a funcionar.
+- Confirmar que os dois componentes contábeis aparecem visualmente na seção correta.
