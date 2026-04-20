@@ -10,7 +10,7 @@ import {
   Monitor,
   ExternalLink,
 } from "lucide-react"
-import { ChatConcierge } from "@/components/dashboard/chat-concierge"
+
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -83,11 +83,8 @@ export default function MesaDeTrabalho() {
         </p>
       </div>
 
-      {/* Two-column grid: main content + Agente Concierge placeholder */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-
-        {/* ── Main Content (3/4) ─────────────────────────────────────────── */}
-        <div className="lg:col-span-3 flex flex-col gap-6">
+      {/* Mesa de Trabalho — largura total */}
+      <div className="flex flex-col gap-6">
 
           {/* ── Bloco 1: Cofre de Templates ──────────────────────────────── */}
           <section className="rounded-xl border border-border bg-card shadow-sm">
@@ -221,11 +218,6 @@ export default function MesaDeTrabalho() {
               ))}
             </ul>
           </section>
-        </div>
-
-        {/* ── Agente Concierge (1/4) ────────────────────────────────────── */}
-        <ChatConcierge />
-
       </div>
     </main>
   )

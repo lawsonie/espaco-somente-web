@@ -9,7 +9,10 @@ const WELCOME_MESSAGE = "Olá! Sou o Assistente Concierge. Posso ajudar você a 
 
 export function ChatConcierge() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
-    useChat({ api: "/api/chat", onError: (err) => console.error("[ChatConcierge]", err) })
+    useChat({
+      api: "/api/chat", onError: (err) => console.error("[ChatConcierge]", err),
+      streamProtocol: 'text', // <-- ISSO AQUI É O SEGREDO
+    });
 
   // Auto-scroll to the latest message
   const bottomRef = useRef<HTMLDivElement>(null)
