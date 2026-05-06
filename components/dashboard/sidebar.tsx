@@ -7,8 +7,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
   Users,
-  ClipboardList,
-  Brain,
+  CalendarDays,
   Briefcase,
   Settings,
   Menu,
@@ -30,8 +29,7 @@ const navigation: NavItem[] = [
   { id: "dashboard", name: "Início", href: "/", icon: LayoutDashboard, subtitle: "Visão geral" },
   { id: "pacientes", name: "Gestão de Pacientes", href: "/pacientes", icon: Users, subtitle: "O Cofre offline" },
   { id: "financeiro", name: "Gestão Financeira", href: "/financeiro", icon: Wallet, subtitle: "Cobranças e recebimentos" },
-  { id: "testes", name: "Plataforma de Testes", href: "/testes", icon: ClipboardList },
-  { id: "ia", name: "IA Assistente", href: "/ia-assistente", icon: Brain, subtitle: "Revisão e ABNT" },
+  { id: "agenda", name: "Agenda", href: "/agenda", icon: CalendarDays, subtitle: "Horários e sessões" },
   { id: "utilitarios", name: "Mesa de Trabalho", href: "/utilitarios", icon: Briefcase, subtitle: "Templates, Formulários e Testes" },
   { id: "config", name: "Configurações", href: "/configuracoes", icon: Settings },
 ]

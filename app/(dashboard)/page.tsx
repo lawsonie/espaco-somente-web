@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Users, Calendar, Bell, UserPlus, Link2, Sparkles } from "lucide-react"
+import { Users, Calendar, Bell, UserPlus, Link2 } from "lucide-react"
 
 export default function DashboardPage() {
   return (
@@ -66,7 +66,7 @@ export default function DashboardPage() {
         <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
           Ações Rápidas
         </h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
           {/* Ação: Novo Paciente */}
           <Link
@@ -92,17 +92,7 @@ export default function DashboardPage() {
             <span className="text-xs text-muted-foreground">Acesse formulários e links rápidos</span>
           </Link>
 
-          {/* Ação: Assistente IA */}
-          <Link
-            href="/ia"
-            className="group rounded-xl border border-border bg-card p-6 shadow-sm flex flex-col items-center justify-center gap-3 text-center hover:border-violet-500 hover:shadow-md transition-all duration-200"
-          >
-            <div className="rounded-full bg-violet-500/10 p-4 group-hover:bg-violet-500/20 transition-colors">
-              <Sparkles className="h-7 w-7 text-violet-500" />
-            </div>
-            <span className="font-semibold text-foreground">Assistente IA</span>
-            <span className="text-xs text-muted-foreground text-violet-400/80">Inteligência para apoiar sua clínica</span>
-          </Link>
+
 
         </div>
       </section>
