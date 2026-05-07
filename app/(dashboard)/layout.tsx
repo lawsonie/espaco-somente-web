@@ -1,6 +1,5 @@
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Topbar } from "@/components/dashboard/topbar"
-import { GlobalConcierge } from "@/components/concierge/global-concierge"
 
 export default function DashboardLayout({
   children,
@@ -22,7 +21,6 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
-      <GlobalConcierge />
     </div>
   )
 }
